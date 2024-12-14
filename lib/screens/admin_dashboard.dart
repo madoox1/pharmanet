@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'pharmacie_list_screen.dart'; // Ajout de l'import
+import 'pharmacien_list_screen.dart';
+import 'patient_list_screen.dart'; // Ajout de l'import manquant
 
 class AdminDashboard extends StatefulWidget {
   @override
@@ -131,7 +132,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       'Gestion des Patients',
                       Icons.people,
                       () {
-                        // TODO: Navigation vers la gestion des patients
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PatientListScreen(),
+                          ),
+                        ).then((_) => fetchCounts());
                       },
                     ),
                     SizedBox(height: 16),
@@ -139,7 +145,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       'Gestion des Pharmaciens',
                       Icons.medical_services,
                       () {
-                        // TODO: Navigation vers la gestion des pharmaciens
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PharmacienListScreen(),
+                          ),
+                        ).then((_) =>
+                            fetchCounts()); // Rafraîchir les compteurs au retour
                       },
                     ),
                     SizedBox(height: 16),
@@ -152,8 +164,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           MaterialPageRoute(
                             builder: (context) => PharmacieListScreen(),
                           ),
-                        ).then((_) =>
-                            fetchCounts()); // Rafraîchir les compteurs au retour
+                        ).then((_) => fetchCounts());
                       },
                     ),
                   ],

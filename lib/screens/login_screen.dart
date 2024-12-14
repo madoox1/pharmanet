@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'admin_dashboard.dart';
 import 'patient_dashboard.dart';
 import 'pharmacist_dashboard.dart';
@@ -14,25 +16,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  // Identifiants statiques
-  final Map<String, Map<String, dynamic>> _staticUsers = {
-    'admin@admin.com': {
-      'password': 'admin123',
-      'type': 'admin',
-      'dashboard': AdminDashboard(),
-    },
-    'patient@test.com': {
-      'password': 'patient123',
-      'type': 'patient',
-      'dashboard': PatientDashboard(),
-    },
-    'pharmacist@test.com': {
-      'password': 'pharma123',
-      'type': 'pharmacist',
-      'dashboard': PharmacistDashboard(),
-    },
-  };
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -44,32 +27,70 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      await Future.delayed(Duration(seconds: 1));
+      try {
+        // Vérification des identifiants admin
+        if (_emailController.text.trim() == 'admin@admin.com' &&
+            _passwordController.text == 'admin123') {
+          // Redirection vers le dashboard admin
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AdminDashboard()),
+          );
 
-      final userEmail = _emailController.text.trim();
-      final userPassword = _passwordController.text;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Bienvenue Admin!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          setState(() => _isLoading = false);
+          return;
+        }
 
-      if (_staticUsers.containsKey(userEmail) &&
-          _staticUsers[userEmail]!['password'] == userPassword) {
-        // Navigation vers le dashboard correspondant
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => _staticUsers[userEmail]!['dashboard'],
-          ),
+        // Si ce n'est pas l'admin, continuer avec l'API pour les autres utilisateurs
+        final response = await http.post(
+          Uri.parse(
+              'http://10.0.2.2:8080/pharmacy-system-backend-1.0-SNAPSHOT/api/login'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'email': _emailController.text.trim(),
+            'password': _passwordController.text,
+          }),
         );
 
-        // Message de bienvenue
+        if (response.statusCode == 200) {
+          final userData = json.decode(response.body);
+          Widget dashboard;
+
+          switch (userData['role']) {
+            case 'Patient':
+              dashboard = PatientDashboard();
+              break;
+            case 'Pharmacien':
+              dashboard = PharmacistDashboard();
+              break;
+            default:
+              throw Exception('Rôle non reconnu');
+          }
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => dashboard),
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Bienvenue ${userData['role']}!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          throw Exception('Email ou mot de passe incorrect');
+        }
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Bienvenue ${_staticUsers[userEmail]!['type']}!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Email ou mot de passe incorrect'),
+            content: Text(e.toString()),
             backgroundColor: Colors.red,
           ),
         );
