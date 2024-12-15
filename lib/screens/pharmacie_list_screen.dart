@@ -104,21 +104,21 @@ class _PharmacieListScreenState extends State<PharmacieListScreen> {
                       Icon(
                         Icons.local_pharmacy_outlined,
                         size: 70,
-                        color: Colors.grey,
+                        color: Colors.grey[400],
                       ),
                       SizedBox(height: 16),
                       Text(
                         'Aucune pharmacie trouvée',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 20,
                           color: Colors.grey[600],
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       SizedBox(height: 8),
                       Text(
                         'Cliquez sur + pour ajouter une pharmacie',
                         style: TextStyle(
-                          fontSize: 14,
                           color: Colors.grey[500],
                         ),
                       ),

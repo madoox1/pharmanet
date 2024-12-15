@@ -30,6 +30,11 @@ class _PharmacienListScreenState extends State<PharmacienListScreen> {
           pharmaciens = data.map((json) => Pharmacien.fromJson(json)).toList();
           isLoading = false;
         });
+      } else if (response.statusCode == 404) {
+        setState(() {
+          pharmaciens = [];
+          isLoading = false;
+        });
       }
     } catch (e) {
       print('Error: $e');
@@ -59,18 +64,14 @@ class _PharmacienListScreenState extends State<PharmacienListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Gestion des Pharmaciens'),
-      ),
+      appBar: AppBar(title: Text('Gestion des Pharmaciens')),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => PharmacienFormScreen()),
           );
-          if (result == true) {
-            fetchPharmaciens();
-          }
+          if (result == true) fetchPharmaciens();
         },
         child: Icon(Icons.add),
       ),
@@ -81,11 +82,26 @@ class _PharmacienListScreenState extends State<PharmacienListScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.person_outline, size: 70, color: Colors.grey),
+                      Icon(
+                        Icons.medical_services_outlined,
+                        size: 70,
+                        color: Colors.grey[400],
+                      ),
                       SizedBox(height: 16),
                       Text(
                         'Aucun pharmacien trouvé',
-                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Cliquez sur + pour ajouter un pharmacien',
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                        ),
                       ),
                     ],
                   ),

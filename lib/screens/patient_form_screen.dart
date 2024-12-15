@@ -39,7 +39,6 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
       final patient = {
         'nom': _nomController.text,
         'prenom': _prenomController.text,
-        // N'inclure l'email que s'il a été modifié
         if (_emailController.text != widget.patient?.email || widget.patient == null)
           'email': _emailController.text,
         'adresse': _adresseController.text,
@@ -73,12 +72,22 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
             ),
           );
         } else {
-          throw Exception('Erreur lors de l\'enregistrement');
+          // Gestion unifiée des erreurs pour création et mise à jour
+          Map<String, dynamic> errorResponse = {};
+          try {
+            errorResponse = json.decode(response.body);
+            throw Exception(errorResponse['message']);
+          } catch (e) {
+            if (e is FormatException) {
+              throw Exception('Erreur lors de l\'enregistrement');
+            }
+            rethrow;
+          }
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text(e.toString().replaceAll('Exception: ', '')),
             backgroundColor: Colors.red,
           ),
         );
@@ -92,7 +101,8 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.patient == null ? 'Nouveau Patient' : 'Modifier Patient'),
+        title: Text(
+            widget.patient == null ? 'Nouveau Patient' : 'Modifier Patient'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),

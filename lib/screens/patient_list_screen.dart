@@ -30,6 +30,11 @@ class _PatientListScreenState extends State<PatientListScreen> {
           patients = data.map((json) => Patient.fromJson(json)).toList();
           isLoading = false;
         });
+      } else if (response.statusCode == 404) {
+        setState(() {
+          patients = [];
+          isLoading = false;
+        });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +80,32 @@ class _PatientListScreenState extends State<PatientListScreen> {
           ? Center(child: CircularProgressIndicator())
           : patients.isEmpty
               ? Center(
-                  child: Text('Aucun patient trouvé'),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person_outline,
+                        size: 70,
+                        color: Colors.grey[400],
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Aucun patient trouvé',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Cliquez sur + pour ajouter un patient',
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               : ListView.builder(
                   itemCount: patients.length,
